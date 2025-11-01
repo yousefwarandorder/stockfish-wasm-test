@@ -78,3 +78,4 @@ else if (typeof define === 'function' && define['amd'])
   define([], function() { return Stockfish; });
 else if (typeof exports === 'object')
   exports["Stockfish"] = Stockfish;
+self.Stockfish = Stockfish;
