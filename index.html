@@ -11,7 +11,7 @@
     (async () => {
       try {
         // ✅ إنشاء Web Worker لتشغيل Stockfish داخل thread منفصل
-        const engine = new Worker('stockfish.js');
+        const w = new Worker('stockfish.worker.js');
 
         // 🔹 استلام رسائل من المحرك (الردود)
         engine.onmessage = (event) => {
