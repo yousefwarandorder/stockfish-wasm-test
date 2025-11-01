@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Stockfish Web Worker Bridge</title>
+</head>
+<body>
+<script>
+const worker = new Worker('stockfish.worker.js');
+let pending = {};
+
+worker.onmessage = (e) => {
+  for (const id in pending) {
+    pending[id](e.data);
+    delete pending[id];
+  }
+};
+
+self.addEventListener('message', (event) => {
+  const { id, command } = event.data;
+  pending[id] = (data) => {
+    self.postMessage({ id, result: data });
+  };
+  worker.postMessage(command);
+});
+</script>
+</body>
+</html>
