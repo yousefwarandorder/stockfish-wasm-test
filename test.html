@@ -10,7 +10,7 @@
     // 1) إذا الملف worker موجود (stockfish.worker.js) — أنشئ Worker مباشر
     if (typeof Worker !== 'undefined') {
       try {
-        const w = new Worker('stockfish.worker.js'); // أو 'stockfish.js' حسب build
+        const w = new Worker('stockfish.js'); // أو 'stockfish.js' حسب build
         w.onmessage = (e) => console.log('engine ->', e.data);
         w.postMessage('uci');
         w.postMessage('isready');
