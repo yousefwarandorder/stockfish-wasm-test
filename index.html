@@ -1,37 +1,36 @@
 <!doctype html>
-<html>
+<html lang="ar">
 <head>
   <meta charset="utf-8">
-  <title>Stockfish WASM Test (No Worker)</title>
+  <title>Stockfish WASM Test</title>
 </head>
 <body>
-  <h2>Running Stockfish WASM...</h2>
-  <pre id="log"></pre>
+  <h3>⚙️ Stockfish WASM Test — افتح الكونسول (F12)</h3>
 
   <script>
-  const log = (msg) => {
-    console.log(msg);
-    document.getElementById('log').textContent += msg + "\n";
-  };
+    (async () => {
+      try {
+        // ✅ إنشاء Web Worker لتشغيل Stockfish داخل thread منفصل
+        const engine = new Worker('stockfish.js');
 
-  (async () => {
-    try {
-      // تأكد إن الملف stockfish.js في نفس المجلد
-      const sf = await Stockfish();
-      log("Engine loaded!");
+        // 🔹 استلام رسائل من المحرك (الردود)
+        engine.onmessage = (event) => {
+          console.log('🧠 Stockfish ->', event.data);
+        };
 
-      sf.addMessageListener((line) => log("Engine: " + line));
+        // 🔹 إرسال أوامر للمحرك
+        console.log('🚀 بدء Stockfish...');
+        engine.postMessage('uci');
+        engine.postMessage('isready');
 
-      sf.postMessage("uci");
-      sf.postMessage("isready");
-      sf.postMessage("position startpos moves e2e4 e7e5 g1f3");
-      sf.postMessage("go movetime 1000");
-    } catch (err) {
-      log("Error: " + err);
-    }
-  })();
+        // مثال: نحدد وضع البداية ونسأله عن أفضل نقلة بعد e2e4 e7e5 g1f3
+        engine.postMessage('position startpos moves e2e4 e7e5 g1f3');
+        engine.postMessage('go movetime 1000'); // فكر لمدة ثانية واحدة
+      } 
+      catch (err) {
+        console.error('❌ فشل تشغيل Stockfish:', err);
+      }
+    })();
   </script>
-
-  <script src="stockfish.js"></script>
 </body>
 </html>
