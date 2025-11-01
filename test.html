@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Stockfish WASM test</title></head>
+<body>
+<h3>Stockfish WASM test — Open console (F12)</h3>
+<script>
+(async () => {
+  // طريقتان لبدء المحرك — جرّب الأولى، وإذا لم تنجح جرّب الثانية
+  try {
+    // 1) إذا الملف worker موجود (stockfish.worker.js) — أنشئ Worker مباشر
+    if (typeof Worker !== 'undefined') {
+      try {
+        const w = new Worker('stockfish.worker.js'); // أو 'stockfish.js' حسب build
+        w.onmessage = (e) => console.log('engine ->', e.data);
+        w.postMessage('uci');
+        w.postMessage('isready');
+        // مثال: ضع موضع واطلب أفضل نقلة لمدة 1 ثانية
+        w.postMessage('position startpos moves e2e4 e7e5 g1f3');
+        w.postMessage('go movetime 1000');
+        return;
+      } catch (err) {
+        console.warn('Worker start failed, falling back to module:', err);
+      }
+    }
+
+    // 2) بديل: بعض builds تُصدر دالة Stockfish() (Module factory)
+    if (typeof Stockfish !== 'undefined' || typeof STOCKFISH !== 'undefined') {
+      const Factory = (typeof Stockfish !== 'undefined') ? Stockfish : STOCKFISH;
+      const mod = await Factory(); // بعض الإصدارات تحتاج await
+      // طريقة إرسال/استقبال قد تختلف حسب build؛ غالبًا: mod.postMessage(...)
+      if (mod.postMessage) {
+        mod.onmessage = (e)=> console.log('engine ->', e.data);
+        mod.postMessage('uci');
+        mod.postMessage('isready');
+        mod.postMessage('position startpos moves e2e4 e7e5 g1f3');
+        mod.postMessage('go movetime 1000');
+      } else {
+        console.warn('Module loaded but interface not found; check your build.');
+      }
+      return;
+    }
+
+    console.error('No known Stockfish loader found. Check filenames and build type.');
+  } catch (e) {
+    console.error('Error starting engine:', e);
+  }
+})();
+</script>
+</body>
+</html>
